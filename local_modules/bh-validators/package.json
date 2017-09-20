@@ -1,0 +1,17 @@
+{
+  "name": "bh-validators",
+  "version": "0.1.1",
+  "description": "Common validators for frontend and backend",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "validators"
+  ],
+  "author": "Przemek Kozinski",
+  "license": "ISC",
+  "dependencies": {
+    "moment": "^2.18.1"
+  }
+}

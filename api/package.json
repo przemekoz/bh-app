@@ -1,0 +1,16 @@
+{
+  "name": "bh-app-api",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "axios": "^0.16.2",
+    "body-parser": "^1.17.2",
+    "express": "^4.15.4",
+    "foreman": "^2.0.0",
+    "marked": "^0.3.6",
+    "moment": "^2.18.1",
+    "mongoose": "^4.11.10",
+    "nodemon": "^1.12.0"
+  },
+  "devDependencies": {}
+}
