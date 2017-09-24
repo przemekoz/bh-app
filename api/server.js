@@ -99,6 +99,15 @@ router.post('/saveEvent', function (req, res) {
     }
 });
 
+router.post('/saveEventTest', function (req, res) {
+    if (validRequest(req.body)) {
+        res.json({ message: 'ok!' });
+    }
+    else {
+        res.json({ message: 'fail!', err: 'validation fail' });
+    }
+});
+
 
 //Use our router configuration when we call /api
 app.use('/api', router);

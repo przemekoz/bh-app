@@ -7,7 +7,7 @@ import moment from 'moment';
 import axios from 'axios';
 import validate from 'bh-validators';
 import 'react-datepicker/dist/react-datepicker.css';
-import { reduxFieldDispatch } from './AppRedux';
+import { reduxFieldDispatch, reduxFormSavedDispatch, reduxGetFields } from './AppRedux';
 
 var lang = 'EN';
 
@@ -54,7 +54,7 @@ class AddEventForm extends Component {
             saved: null
         };
         // redux: set default date
-        reduxFieldDispatch('date', moment());;
+        reduxFieldDispatch('date', moment(), true);
 
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleInputChange = this.handleInputChange.bind(this);
@@ -69,44 +69,38 @@ class AddEventForm extends Component {
 
         this.validate = function (name, value) {
             var isValid = this.validators[name] ? this.validators[name](value) : true;
-            var state = this.state;
-            state.validation[name] = isValid ? '' : 'error';
-            this.setState(state);
+            // var state = this.state;
+            // state.validation[name] = isValid ? '' : 'error';
+            // this.setState(state);
             return isValid;
-        };
-
-        this.setFieldState = function (name, value) {
-            var state = this.state;
-            state.value[name] = value;
-            this.setState(state);
         };
     }
 
     handleSubmit(event) {
         event.preventDefault();
-        var _this = this;
         var canSubmit = true;
-        for (var name in this.validators) {
-            if (this.validators.hasOwnProperty(name)) {
-                if (this.validate(name, this.state.value[name]) === false) {
-                    // canSubmit = false;
-                }
-            }
-        }
+
+        // for (var name in this.validators) {
+        //     if (this.validators.hasOwnProperty(name)) {
+        //         if (this.validate(name, this.state.value[name]) === false) {
+        //             canSubmit = false;
+        //         }
+        //     }
+        // }
 
         if (canSubmit) {
-            axios.post('http://localhost:3001/api/saveEvent', this.state.value)
+            axios.post('http://localhost:3001/api/saveEvent', reduxGetFields())
                 .then(function (response) {
                     console.log(response.data)
                     if (response.data.message === 'ok!') {
-                        _this.setState({saved: true});
+                        reduxFormSavedDispatch(true);
                     }
                     else {
-                        _this.setState({saved: false});    
+                        reduxFormSavedDispatch(false, response.data.err);
                     }
                 })
                 .catch(function (error) {
-                    _this.setState({saved: false});
+                    reduxFormSavedDispatch(false, error.data.err);
                 });
         }
     }
@@ -114,17 +108,15 @@ class AddEventForm extends Component {
     handleInputChange(event) {
         var name = event.target.name;
         var value = event.target.value;
-        this.validate(name, value);
-        this.setFieldState(name, value);
+        var isValid = this.validate(name, value);
         // redux: set state of field
-        reduxFieldDispatch(name, value);
+        reduxFieldDispatch(name, value, isValid);
     }
 
     handleDateChange(date) {
-        this.validate('date', date);
-        this.setFieldState('date', date);
+        var isValid = this.validate('date', date);
         // redux: set state of field
-        reduxFieldDispatch('date', date);
+        reduxFieldDispatch('date', date, isValid);
     }
 
     render() {
@@ -199,7 +191,7 @@ class AddEventForm extends Component {
                                         <DatePicker
                                             name="date"
                                             className={this.state.validation.date}
-                                            selected={this.state.value.date}
+                                            selected={reduxGetFields().date}
                                             onChange={this.handleDateChange} />
                                         <span className={this.state.validation.date}>{getDict('LABEL_DATE')} {getDict('IS_REQUIRED_VALID')}.</span>
                                     </div>

@@ -1,39 +1,43 @@
-import _ from 'lodash/collection';
+import _ from 'lodash/object';
 import { createStore } from 'redux';
 
-const field = (state = {}, action) => {
-
+const form = (state = { fields: {}, saved: null, error: '' }, action) => {
     switch (action.type) {
         case 'FIELD_CHANGED':
+            let fields = state.fields;
+            fields[action.name] = {
+                value: action.value,
+                valid: action.valid
+            };
             return {
-                name: action.name,
-                value: action.value
-            }
-
+                fields: fields,
+                saved: state.saved,
+                error: state.error
+            };
+        case 'FORM_SAVED':
+            return {
+                saved: action.saved,
+                error: action.message,
+                fields: state.fields
+            };
         default:
             return state;
     }
 };
 
-const fields = (state = {}, action) => {
+const store = createStore(form);
 
-    switch (action.type) {
-        case 'FIELD_CHANGED':
-            let result = _.reject(state.fields, ['name', action.name]);
-            return {
-                fields: result.concat( [ field(undefined, action) ] )
-            }
-        default:
-            return state;
-    }
-};
-
-const store = createStore(fields);
-
-
-export function reduxFieldDispatch(name, value) {
-    store.dispatch({ name: name, value: value, type: 'FIELD_CHANGED' });
+export function reduxFieldDispatch(name, value, valid) {
+    store.dispatch({ name: name, value: value, valid: valid, type: 'FIELD_CHANGED' });
 }
+
+export function reduxFormSavedDispatch(saved, message = '') {
+    store.dispatch({ saved: saved, message: message, type: 'FORM_SAVED' });
+}
+
+export function reduxGetFields() {
+    return _.mapValues(store.getState().fields, 'value');
+};
 
 store.subscribe(function () {
     console.log(store.getState());

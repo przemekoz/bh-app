@@ -50,3 +50,25 @@ it('can connect to database', () => {
             expect(response.data.message).toBe('ok!');
         });
 });
+
+it('pass backend validation - correct event', () => {
+    return axios.post('http://localhost:3001/api/saveEventTest', {
+        firstName: 'John',
+        lastName: 'Novak',
+        email: 'jogn.novak@examle.com',
+        date: '2017-09-24T21:21:51.362Z'
+    }).then(function (response) {
+        expect(response.data.message).toBe('ok!');
+    });
+});
+
+it('dont pass backend validation - fail event', () => {
+    return axios.post('http://localhost:3001/api/saveEventTest', {
+        firstName: 'John',
+        lastName: 'Novak',
+        email: 'jogn.novak@examle..com',
+        date: '2017-09-24T21:21:51.362Z'
+    }).then(function (response) {
+        expect(response.data.message).toBe('fail!');
+    });
+});
