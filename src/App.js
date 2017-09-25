@@ -1,13 +1,14 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
 
-import DatePicker from 'react-datepicker';
 import moment from 'moment';
 import axios from 'axios';
 import validate from 'bh-validators';
 import 'react-datepicker/dist/react-datepicker.css';
 import { reduxFieldDispatch, reduxFormSavedDispatch, reduxGetFields } from './AppRedux';
+import FormRow from './FormRow';
+import FormHeader from './FormHeader';
+import FormAlerts from './FormAlerts';
 
 var lang = 'EN';
 
@@ -16,6 +17,7 @@ function getDict(messageKey) {
         EN: {
             FORM_LEGEND: 'Add event form',
             FORM_SAVE: 'Add event',
+            FORM_ADD_NEW_EVENT: 'New event',
             LABEL_EMAIL: 'Email',
             LABEL_DATE: 'Event date',
             LABEL_FIRSTNAME: 'First name',
@@ -30,10 +32,6 @@ function getDict(messageKey) {
         messages[lang][messageKey] : messageKey;
 }
 
-function isRequired(value) {
-    return value ? true : false;
-}
-
 class AddEventForm extends Component {
 
     constructor(props) {
@@ -45,12 +43,6 @@ class AddEventForm extends Component {
                 email: '',
                 date: ''
             },
-            value: {
-                firstName: null,
-                lastName: null,
-                email: null,
-                date: moment()
-            },
             saved: null
         };
         // redux: set default date
@@ -59,47 +51,50 @@ class AddEventForm extends Component {
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleInputChange = this.handleInputChange.bind(this);
         this.handleDateChange = this.handleDateChange.bind(this);
+        this.setFieldClassName = this.setFieldClassName.bind(this);
+        this.handleResetClick = this.handleResetClick.bind(this);
 
         this.validators = {
-            firstName: isRequired,
-            lastName: isRequired,
+            firstName: validate.isRequired,
+            lastName: validate.isRequired,
             date: validate.date,
             email: validate.email
         };
 
         this.validate = function (name, value) {
-            var isValid = this.validators[name] ? this.validators[name](value) : true;
-            // var state = this.state;
-            // state.validation[name] = isValid ? '' : 'error';
-            // this.setState(state);
-            return isValid;
+            return this.validators[name] ? this.validators[name](value) : true;
         };
+
     }
 
     handleSubmit(event) {
         event.preventDefault();
         var canSubmit = true;
 
-        // for (var name in this.validators) {
-        //     if (this.validators.hasOwnProperty(name)) {
-        //         if (this.validate(name, this.state.value[name]) === false) {
-        //             canSubmit = false;
-        //         }
-        //     }
-        // }
+        for (var name in this.validators) {
+            if (this.validators.hasOwnProperty(name)) {
+                if (this.validate(name, reduxGetFields()[name]) === false) {
+                    canSubmit = false;
+                    this.setFieldClassName(name, false);
+                }
+            }
+        }
 
         if (canSubmit) {
+            var _this = this;
             axios.post('http://localhost:3001/api/saveEvent', reduxGetFields())
                 .then(function (response) {
-                    console.log(response.data)
                     if (response.data.message === 'ok!') {
+                        _this.setState({ saved: true });
                         reduxFormSavedDispatch(true);
                     }
                     else {
+                        _this.setState({ saved: false });
                         reduxFormSavedDispatch(false, response.data.err);
                     }
                 })
                 .catch(function (error) {
+                    _this.setState({ saved: false });
                     reduxFormSavedDispatch(false, error.data.err);
                 });
         }
@@ -109,100 +104,88 @@ class AddEventForm extends Component {
         var name = event.target.name;
         var value = event.target.value;
         var isValid = this.validate(name, value);
-        // redux: set state of field
+        this.setFieldClassName(name, isValid);
         reduxFieldDispatch(name, value, isValid);
     }
 
     handleDateChange(date) {
         var isValid = this.validate('date', date);
-        // redux: set state of field
+        this.setFieldClassName('date', isValid);
         reduxFieldDispatch('date', date, isValid);
+    }
+
+    setFieldClassName(name, isValid) {
+        var state = this.state;
+        state.validation[name] = isValid ? '' : 'error';
+        this.setState(state);
+    }
+
+    handleResetClick() {
+        reduxFieldDispatch('firstName', '');
+        reduxFieldDispatch('lastName', '');
+        reduxFieldDispatch('email', '');
+        this.setState({ saved: null });
     }
 
     render() {
         return (
             <div className="App">
-                <div className="App-header">
-                    <img src={logo} className="App-logo" alt="logo" />
-                    <h2>Welcome to React</h2>
-                </div>
+                <FormHeader />
 
-                <div className="callout success" style={{ display: this.state.saved === true ? 'block' : 'none' }}>
-                    <p>{getDict('SAVED_SUCCESS')}.</p>
-                </div>
-                <div className="callout alert" style={{ display: this.state.saved === false ? 'block' : 'none' }}>
-                    <p>{getDict('SAVED_ERROR')}.</p>
-                </div>
+                <FormAlerts
+                    saved={this.state.saved}
+                    success={getDict('SAVED_SUCCESS')}
+                    error={getDict('SAVED_ERROR')}
+                />
+
                 <form onSubmit={this.handleSubmit}>
                     <fieldset className="fieldset">
                         <legend>{getDict('FORM_LEGEND')}</legend>
-                        <div className="row">
-                            <div className="small-12 columns">
-                                <label>
-                                    <span>
-                                        {getDict('LABEL_FIRSTNAME')}
-                                    </span>
-                                    <div>
-                                        <input
-                                            type="text"
-                                            name="firstName"
-                                            className={this.state.validation.firstName}
-                                            onChange={this.handleInputChange} />
-                                        <span className={this.state.validation.firstName}>{getDict('LABEL_FIRSTNAME')} {getDict('IS_REQUIRED')}.</span>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-                        <div className="row">
-                            <div className="small-12 columns">
-                                <label>
-                                    <span>{getDict('LABEL_LASTNAME')}</span>
-                                    <div>
-                                        <input
-                                            type="text"
-                                            name="lastName"
-                                            className={this.state.validation.lastName}
-                                            onChange={this.handleInputChange} />
-                                        <span className={this.state.validation.lastName}>{getDict('LABEL_LASTNAME')} {getDict('IS_REQUIRED')}.</span>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-                        <div className="row">
-                            <div className="small-12 columns">
-                                <label>
-                                    <span>{getDict('LABEL_EMAIL')}</span>
-                                    <div>
-                                        <input
-                                            type="email"
-                                            name="email"
-                                            className={this.state.validation.email}
-                                            onChange={this.handleInputChange} />
-                                        <span className={this.state.validation.email}>{getDict('LABEL_EMAIL')} {getDict('IS_REQUIRED_VALID')}.</span>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-                        <div className="row">
-                            <div className="small-12 columns">
-                                <label>
-                                    <span>{getDict('LABEL_DATE')}</span>
-                                    <div>
-                                        <DatePicker
-                                            name="date"
-                                            className={this.state.validation.date}
-                                            selected={reduxGetFields().date}
-                                            onChange={this.handleDateChange} />
-                                        <span className={this.state.validation.date}>{getDict('LABEL_DATE')} {getDict('IS_REQUIRED_VALID')}.</span>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-                        <div className="row">
-                            <div className="small-12 columns">
-                                <button className="button" type="submit">{getDict('FORM_SAVE')}</button>
-                            </div>
-                        </div>
+
+                        <FormRow
+                            type="text"
+                            name="firstName"
+                            label={getDict('LABEL_FIRSTNAME')}
+                            className={this.state.validation.firstName}
+                            onChange={this.handleInputChange}
+                            errorMessage={getDict('LABEL_FIRSTNAME') + ' ' + getDict('IS_REQUIRED')}
+                        />
+
+                        <FormRow
+                            type="text"
+                            name="lastName"
+                            label={getDict('LABEL_LASTNAME')}
+                            className={this.state.validation.lastName}
+                            onChange={this.handleInputChange}
+                            errorMessage={getDict('LABEL_LASTNAME') + ' ' + getDict('IS_REQUIRED')}
+                        />
+
+                        <FormRow
+                            type="email"
+                            name="email"
+                            label={getDict('LABEL_EMAIL')}
+                            className={this.state.validation.email}
+                            onChange={this.handleInputChange}
+                            errorMessage={getDict('LABEL_EMAIL') + ' ' + getDict('IS_REQUIRED_VALID')}
+                        />
+
+                        <FormRow
+                            type="datepicker"
+                            name="date"
+                            label={getDict('LABEL_DATE')}
+                            className={this.state.validation.date}
+                            selected={reduxGetFields().date}
+                            onChange={this.handleDateChange}
+                            errorMessage={getDict('LABEL_DATE') + ' ' + getDict('IS_REQUIRED_VALID')}
+                        />
+
+                        <FormRow
+                            type="submit"
+                            saved={this.state.saved}
+                            onResetClick={this.handleResetClick}
+                            saveLabel={getDict('FORM_SAVE')}
+                            resetLabel={getDict('FORM_ADD_NEW_EVENT')}
+                        />
                     </fieldset>
                 </form>
             </div>
