@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "axios": "^0.16.2",
+    "bh-validators": "file:..\\local_modules\\bh-validators",
     "body-parser": "^1.17.2",
     "express": "^4.15.4",
     "foreman": "^2.0.0",
