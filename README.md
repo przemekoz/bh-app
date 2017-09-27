@@ -1,4 +1,4 @@
-# [Add Event Form]
+## Add Event Form
 
 This is simple form to adding events.
 All fields are required, email and date are validated.
@@ -16,7 +16,7 @@ Used modules:
 * Mongoose
 * bg-validators (local module)
 
-## Installation
+### Installation
 Backend expects that MongoDb is available on localhost, port 27017.
 
 Copy files to `someDirectory`. 
