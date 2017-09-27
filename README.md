@@ -3,7 +3,7 @@
 This is simple form to adding events.
 All fields are required, email and date are validated.
 
-Used:
+Used modules:
 * React
 * Redux
 * Axios
@@ -23,10 +23,16 @@ Copy files to `someDirectory`.
 
 1. Run backend part. Change diretory to: `someDirectory/api` and type:
 ```console
+npm install
+```
+```console
 npm start
 ```
 
 2. Run frontend part. Change directory to: `someDirectory` and type:
+```console
+npm install
+```
 ```console
 npm start
 ```
