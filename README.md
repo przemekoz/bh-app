@@ -19,9 +19,9 @@ Used modules:
 ### Installation
 Backend expects that MongoDb is available on localhost, port 27017.
 
-Copy files to `someDirectory`. 
+Download files to `installDirectory`. 
 
-1. Run backend part. Change diretory to: `someDirectory/api` and type:
+1. Run backend part. Change directory to: `installDirectory/api` and type:
 ```console
 npm install
 ```
@@ -29,7 +29,7 @@ npm install
 npm start
 ```
 
-2. Run frontend part. Change directory to: `someDirectory` and type:
+2. Run frontend part. Change directory to: `installDirectory` and type:
 ```console
 npm install
 ```
