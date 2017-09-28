@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import InputChooser from './InputChooser';
 
 export default class FormRow extends React.Component {

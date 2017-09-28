@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import InputText from './InputText';
 import InputSubmit from './InputSubmit';
 import InputDatePicker from './InputDatePicker';

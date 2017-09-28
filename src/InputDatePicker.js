@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import DatePicker from 'react-datepicker';
 
 export default class InputDatePicker extends React.Component {
